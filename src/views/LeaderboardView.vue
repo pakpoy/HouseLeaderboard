@@ -1,4 +1,5 @@
 <script>
+import { onMounted } from "vue";
 import houses from "@/data/houses";
 import events from "@/data/events";
 
@@ -17,6 +18,8 @@ function eventInHouseWidth(eventId, houseId) {
   const event = events.filter((h) => h.id === eventId);
   return (event[0].points[houseId] / house[0].score) * 100;
 }
+
+onMounted(() => {});
 
 export default {
   setup() {
@@ -81,9 +84,7 @@ export default {
                 background-color: ${subEvent.backgroundColor};
                 `"
               >
-                <svg viewBox="0 0 56 18">
-                  <text x="0" y="15">{{ subEvent.points[house.id] }}</text>
-                </svg>
+                {{ subEvent.points[house.id] }}
               </div>
             </div>
           </template>
