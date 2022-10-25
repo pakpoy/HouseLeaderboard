@@ -35,8 +35,18 @@ function returnScore(eventId, houseId) {
 }
 
 function publish() {
-  socket.emit("missioncontrol", store.state.events);
+  socket.emit("missioncontrol", store.state);
 }
+
+const showSubOnly = computed({
+  get() {
+    return store.state.showSubOnly;
+  },
+  set(to) {
+    store.commit("updateShowSubOnly", to);
+    console.log(store.state);
+  },
+});
 </script>
 
 <template>
@@ -84,6 +94,7 @@ function publish() {
     </tr>
   </table>
   <button @click="publish()">Publish</button>
+  <input type="number" v-model="showSubOnly" class="score" />
 </template>
 
 <style lang="scss" scoped>

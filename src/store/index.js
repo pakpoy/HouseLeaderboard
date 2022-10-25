@@ -10,11 +10,17 @@ import HandballIcon from "@/assets/icons/extras/handball.svg";
 import MarioIcon from "@/assets/icons/extras/mario.svg";
 import NetballIcon from "@/assets/icons/extras/netball.svg";
 import SpellingBeeIcon from "@/assets/icons/extras/spelling-bee.svg";
+import LogoFoundation from "@/assets/icons/new/logos-Foundation.svg";
+import LogoRadPAC from "@/assets/icons/new/logos-RadPAC.svg";
+import LogoXC from "@/assets/icons/new/logos-XC.svg";
+
+import LogoAthletics from "@/assets/icons/new/logos-Aths.svg";
 
 import _ from "lodash";
 
 export default createStore({
   state: {
+    showSubOnly: 0,
     events: [
       {
         id: 0,
@@ -22,12 +28,14 @@ export default createStore({
         subbed: false,
         points: { 1: 6, 2: 8, 3: 7, 4: 1, 5: 4, 6: 3, 7: 2, 8: 5 },
         icon: AthleticsIcon,
+        newBg: LogoAthletics,
       },
       {
         id: 1,
         name: "Foundation Day",
         subbed: false,
         points: { 2: 8, 1: 7, 3: 6, 4: 4, 5: 3, 6: 5, 7: 1, 8: 2 },
+        newBg: LogoFoundation,
       },
       {
         id: 2,
@@ -35,6 +43,7 @@ export default createStore({
         subbed: false,
         points: { 2: 5, 1: 8, 3: 4, 4: 7, 5: 2, 6: 6, 7: 4, 8: 2 },
         icon: RADPACIcon,
+        newBg: LogoRadPAC,
       },
       {
         id: 3,
@@ -42,6 +51,7 @@ export default createStore({
         subbed: false,
         points: { 2: 8, 1: 7, 3: 3, 4: 5, 5: 6, 6: 1, 7: 4, 8: 2 },
         icon: CrossCountryIcon,
+        newBg: LogoXC,
       },
       {
         id: 4,
@@ -198,6 +208,14 @@ export default createStore({
       }
       return totalScore();
     },
+    dynamicEvents(state) {
+      if (state.showSubOnly) {
+        let masterEventIndex = state.events.findIndex(
+          (e) => state.showSubOnly === e.id
+        );
+        return state.events[masterEventIndex].subEvents;
+      } else return state.events;
+    },
   },
   mutations: {
     updateScore(state, { newScore, event, house, subEventId }) {
@@ -217,8 +235,12 @@ export default createStore({
         state.events[eventIndex].points[house] = newScore;
       }
     },
-    updatesFromMissionControl(state, newEvents) {
-      state.events = newEvents;
+    updatesFromMissionControl(state, newState) {
+      state.events = newState.events;
+      state.showSubOnly = newState.showSubOnly;
+    },
+    updateShowSubOnly(state, toId) {
+      state.showSubOnly = toId;
     },
   },
   actions: {},

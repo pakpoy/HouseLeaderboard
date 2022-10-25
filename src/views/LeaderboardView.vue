@@ -5,11 +5,8 @@ import socket from "@/socket";
 
 const store = useStore();
 
-console.log(store.getters.storesTotalScore);
-
 function houseWidth(id) {
   const housesByPoints = store.getters.storesTotalScore;
-  console.log(housesByPoints);
   const house = housesByPoints.filter((h) => h.id === id);
   const maxPoints = housesByPoints[0].score;
   return (house[0].score / maxPoints) * 100;
@@ -17,9 +14,8 @@ function houseWidth(id) {
 
 function eventInHouseWidth(eventId, houseId) {
   const housesByPoints = store.getters.storesTotalScore;
-  console.log(housesByPoints);
   const house = housesByPoints.filter((h) => h.id === houseId);
-  const event = store.state.events.filter((h) => h.id === eventId);
+  const event = store.getters.dynamicEvents.filter((h) => h.id === eventId);
   return (event[0].points[houseId] / house[0].score) * 100;
 }
 
@@ -30,7 +26,7 @@ onMounted(() => {
 });
 
 const eventsStore = computed(() => {
-  return store.state.events;
+  return store.getters.dynamicEvents;
 });
 
 const storesTotalScoreComputed = computed(() => {
@@ -52,7 +48,7 @@ const storesTotalScoreComputed = computed(() => {
           color: ${house.textColor};
           width: ${houseWidth(house.id)}%;
           top: calc(12.5% * ${index});
-          border: 2px solid ${house.textColor};
+          border: 2px solid #000;
           `"
         >
           <div class="text">
@@ -66,9 +62,10 @@ const storesTotalScoreComputed = computed(() => {
                 <div
                   v-if="!event.subbed"
                   class="event"
+                  :class="{ withNewBg: event.newBg }"
                   :style="`
             width: ${eventInHouseWidth(event.id, house.id)}%;
-            background-image: url(${event.icon});
+            background-image: url(${event.newBg});
             border: 2px solid ${house.textColor};
             `"
                 >
@@ -155,6 +152,15 @@ const storesTotalScoreComputed = computed(() => {
           border-radius: 4px;
           display: flex;
           align-items: flex-end;
+          &.withNewBg {
+            background-size: cover;
+            background-repeat: repeat-x;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+          }
           &.subbed {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
