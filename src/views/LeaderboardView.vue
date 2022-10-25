@@ -1,103 +1,119 @@
-<script>
-import { onMounted } from "vue";
-import houses from "@/data/houses";
-import events from "@/data/events";
+<script setup>
+import { onMounted, computed } from "vue";
+import { useStore } from "vuex";
+import socket from "@/socket";
 
-import totalScore from "@/helpers/TotalScore";
+const store = useStore();
+
+console.log(store.getters.storesTotalScore);
 
 function houseWidth(id) {
-  const housesByPoints = totalScore();
+  const housesByPoints = store.getters.storesTotalScore;
+  console.log(housesByPoints);
   const house = housesByPoints.filter((h) => h.id === id);
   const maxPoints = housesByPoints[0].score;
   return (house[0].score / maxPoints) * 100;
 }
 
 function eventInHouseWidth(eventId, houseId) {
-  const housesByPoints = totalScore();
+  const housesByPoints = store.getters.storesTotalScore;
+  console.log(housesByPoints);
   const house = housesByPoints.filter((h) => h.id === houseId);
-  const event = events.filter((h) => h.id === eventId);
+  const event = store.state.events.filter((h) => h.id === eventId);
   return (event[0].points[houseId] / house[0].score) * 100;
 }
 
-onMounted(() => {});
+onMounted(() => {
+  socket.on("fromMissionControl", (data) => {
+    store.commit("updatesFromMissionControl", data);
+  });
+});
 
-export default {
-  setup() {
-    return {
-      houses,
-      events,
-      houseWidth,
-      eventInHouseWidth,
-      totalScore,
-    };
-  },
-};
+const eventsStore = computed(() => {
+  return store.state.events;
+});
+
+const storesTotalScoreComputed = computed(() => {
+  return store.getters.storesTotalScore;
+});
 </script>
 
 <template>
   <div class="leaderboard">
     <h1 class="header">Radford House Leaderboard 2022</h1>
     <div class="houses">
-      <div
-        class="house"
-        v-for="(house, index) in totalScore()"
-        :key="index"
-        :style="`
+      <TransitionGroup name="list" appear>
+        <div
+          class="house"
+          v-for="(house, index) in storesTotalScoreComputed"
+          :key="house.id"
+          :style="`
           background-color: ${house.color}d7;
           color: ${house.textColor};
-          width: ${houseWidth(house.id)}%
+          width: ${houseWidth(house.id)}%;
+          top: calc(12.5% * ${index});
+          border: 2px solid ${house.textColor};
           `"
-      >
-        <div class="text">
-          <h1>{{ house.name }}</h1>
-          <h1>{{ house.score }} pts</h1>
-        </div>
-        <div class="events">
-          <template v-for="(event, index) in events" :key="index">
-            <!-- Major Event Block -->
-            <div
-              v-if="!event.subbed"
-              class="event"
-              :style="`
+        >
+          <div class="text">
+            <h1>{{ house.name }}</h1>
+            <h1>{{ house.score }} pts</h1>
+          </div>
+          <div class="events">
+            <TransitionGroup name="width">
+              <template v-for="event in eventsStore" :key="event.id">
+                <!-- Major Event Block -->
+                <div
+                  v-if="!event.subbed"
+                  class="event"
+                  :style="`
             width: ${eventInHouseWidth(event.id, house.id)}%;
-            background-image: url(${event.icon})
+            background-image: url(${event.icon});
+            border: 2px solid ${house.textColor};
             `"
-            >
-              {{ event.points[house.id] }}
-            </div>
+                >
+                  {{ event.points[house.id] }}
+                </div>
 
-            <!-- Minor Event Block -->
+                <!-- Minor Event Block -->
 
-            <div
-              v-else-if="event.subbed"
-              class="event subbed"
-              :style="`
+                <div
+                  v-else-if="event.subbed"
+                  class="event subbed"
+                  :style="`
             width: ${eventInHouseWidth(event.id, house.id)}%;
             `"
-            >
-              <div
-                class="sub-event"
-                v-for="subEvent of event.subEvents"
-                :key="subEvent.id"
-                :style="`
+                >
+                  <div
+                    class="sub-event"
+                    v-for="subEvent of event.subEvents"
+                    :key="subEvent.id"
+                    :style="`
                 background-image: url(${subEvent.icon});
                 background-color: ${subEvent.backgroundColor};
                 `"
-              >
-                {{ subEvent.points[house.id] }}
-              </div>
-            </div>
-          </template>
+                  >
+                    {{ subEvent.points[house.id] }}
+                  </div>
+                </div>
+              </template>
+            </TransitionGroup>
+          </div>
         </div>
-      </div>
+      </TransitionGroup>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .leaderboard {
-  background-image: url("@/assets/oval.jpg");
+  // background-image: url("@/assets/oval.jpg");
+  // background-color: darkgrey;
   background-size: 100% 100%;
+  background-image: url("@/assets/R1_corner.svg");
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: bottom right;
   height: 100%;
   display: grid;
   grid-template-rows: 4em 1fr;
@@ -109,10 +125,11 @@ export default {
     text-align: center;
   }
   .houses {
-    display: grid;
     height: 100%;
-    grid-template-rows: repeat(8, 1fr);
     gap: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     .house {
       backdrop-filter: blur(180);
       display: grid;
@@ -134,7 +151,6 @@ export default {
           background-repeat: no-repeat;
           background-origin: content-box;
           background-position: center;
-          border: 2px solid #ffffff;
           padding: 1em;
           border-radius: 4px;
           display: flex;
@@ -157,5 +173,29 @@ export default {
       }
     }
   }
+}
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.list-leave-active {
+  position: absolute;
+}
+
+.width-move,
+.width-enter-active,
+.width-leave-active {
+  transition: all 0.5s ease;
+}
+
+.width-leave-active {
+  position: absolute;
 }
 </style>

@@ -3,10 +3,9 @@ module.exports = defineConfig({
   transpileDependencies: true,
   pluginOptions: {
     electronBuilder: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false,
-      preload: "src/preload.js",
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
       builderOptions: {
         appId: "com.willpakpoy.houseleaderboard",
         productName: "HouseLeaderboard",
