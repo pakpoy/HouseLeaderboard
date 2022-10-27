@@ -57,7 +57,7 @@ const showSubOnly = computed({
         {{ event.name }}
       </th>
     </tr>
-    <tr v-for="house of store.state.houses" :key="house.id">
+    <tr v-for="(house, index) of store.state.houses" :key="house.id">
       <th
         class="house-name"
         :style="`
@@ -65,6 +65,12 @@ const showSubOnly = computed({
           color: ${house.textColor};
           `"
       >
+        <input
+          type="checkbox"
+          :value="store.state.houses[index].hidden"
+          @input="(change) => store.commit(`updateHidden`, index)"
+          class="score"
+        />
         {{ house.name }}
       </th>
       <td

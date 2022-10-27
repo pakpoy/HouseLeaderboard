@@ -1,8 +1,8 @@
 import { createStore } from "vuex";
 
-import CrossCountryIcon from "@/assets/icons/RadfordCrossCountry.svg";
-import AthleticsIcon from "@/assets/icons/RadfordXC.svg";
-import RADPACIcon from "@/assets/icons/RADPAC.svg";
+// import CrossCountryIcon from "@/assets/icons/RadfordCrossCountry.svg";
+// import AthleticsIcon from "@/assets/icons/RadfordXC.svg";
+// import RADPACIcon from "@/assets/icons/RADPAC.svg";
 
 import ChessIcon from "@/assets/icons/extras/chess.svg";
 import DebatingIcon from "@/assets/icons/extras/debate.svg";
@@ -27,7 +27,7 @@ export default createStore({
         name: "Athletics",
         subbed: false,
         points: { 1: 6, 2: 8, 3: 7, 4: 1, 5: 4, 6: 3, 7: 2, 8: 5 },
-        icon: AthleticsIcon,
+        // icon: AthleticsIcon,
         newBg: LogoAthletics,
       },
       {
@@ -42,7 +42,7 @@ export default createStore({
         name: "RADPAC",
         subbed: false,
         points: { 2: 5, 1: 8, 3: 4, 4: 7, 5: 2, 6: 6, 7: 4, 8: 2 },
-        icon: RADPACIcon,
+        // icon: RADPACIcon,
         newBg: LogoRadPAC,
       },
       {
@@ -50,7 +50,7 @@ export default createStore({
         name: "Cross Country",
         subbed: false,
         points: { 2: 8, 1: 7, 3: 3, 4: 5, 5: 6, 6: 1, 7: 4, 8: 2 },
-        icon: CrossCountryIcon,
+        // icon: CrossCountryIcon,
         newBg: LogoXC,
       },
       {
@@ -109,54 +109,62 @@ export default createStore({
         name: "Huon",
         color: "#000000",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 5,
         name: "Acacia",
         color: "#FDCB00",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 2,
         name: "Banksia",
         color: "#ffffff",
         textColor: "#000",
+        hidden: false,
       },
       {
         id: 6,
         name: "Boronia",
         color: "#F01B1F",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 3,
         name: "Jarrah",
         color: "#85439B",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 4,
         name: "Karri",
         color: "#0E113E",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 7,
         name: "Kurrajong",
         color: "#0C9A46",
         textColor: "#fff",
+        hidden: false,
       },
       {
         id: 8,
         name: "Wandoo",
         color: "#3E75BC",
         textColor: "#fff",
+        hidden: false,
       },
     ],
   },
   getters: {
-    storesTotalScore(state) {
-      let events = state.events;
+    storesTotalScore(state, getters) {
+      let events = getters.dynamicEvents;
       function houseTotalScore(houseId) {
         let score = 0;
         events.forEach((event) => {
@@ -238,9 +246,13 @@ export default createStore({
     updatesFromMissionControl(state, newState) {
       state.events = newState.events;
       state.showSubOnly = newState.showSubOnly;
+      state.houses = newState.houses;
     },
     updateShowSubOnly(state, toId) {
       state.showSubOnly = toId;
+    },
+    updateHidden(state, house) {
+      state.houses[house].hidden = !state.houses[house].hidden;
     },
   },
   actions: {},

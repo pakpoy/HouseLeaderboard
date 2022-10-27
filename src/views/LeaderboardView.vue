@@ -36,7 +36,13 @@ const storesTotalScoreComputed = computed(() => {
 
 <template>
   <div class="leaderboard">
-    <h1 class="header">Radford House Leaderboard 2022</h1>
+    <h1 class="header">
+      {{
+        store.state.showSubOnly
+          ? "Best of the Rest"
+          : "Radford House Leaderboard"
+      }}
+    </h1>
     <div class="houses">
       <TransitionGroup name="list" appear>
         <div
@@ -49,6 +55,7 @@ const storesTotalScoreComputed = computed(() => {
           width: ${houseWidth(house.id)}%;
           top: calc(12.5% * ${index});
           border: 2px solid #000;
+          opacity: ${house.hidden ? 0 : 100}
           `"
         >
           <div class="text">
@@ -60,16 +67,20 @@ const storesTotalScoreComputed = computed(() => {
               <template v-for="event in eventsStore" :key="event.id">
                 <!-- Major Event Block -->
                 <div
-                  v-if="!event.subbed"
+                  v-if="!event.subbed && event.points[house.id] > 0"
                   class="event"
-                  :class="{ withNewBg: event.newBg }"
+                  :class="{
+                    withNewBg: event.newBg,
+                    differentSubbed: event.backgroundColor,
+                  }"
                   :style="`
             width: ${eventInHouseWidth(event.id, house.id)}%;
-            background-image: url(${event.newBg});
+            background-image: url(${event.icon ? event.icon : event.newBg});
+            background-color: ${event.backgroundColor};
             border: 2px solid ${house.textColor};
             `"
                 >
-                  {{ event.points[house.id] }}
+                  <span>{{ event.points[house.id] }}</span>
                 </div>
 
                 <!-- Minor Event Block -->
@@ -160,6 +171,18 @@ const storesTotalScoreComputed = computed(() => {
             align-items: center;
             justify-content: center;
             font-size: 2em;
+          }
+          &.differentSubbed {
+            background-size: contain;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            padding: 0;
+            color: #000;
+            span {
+              backdrop-filter: brightness(1.1);
+            }
           }
           &.subbed {
             display: grid;
